@@ -2,10 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from './auth/auth.module';
-import { User } from './users/user.entity';
 
-import { DoctorController } from './doctor/doctor.controller';
-import { PatientController } from './patient/patient.controller';
+import { User } from './users/user.entity';
+import { Doctor } from './doctor/doctor.entity';
+import { Patient } from './patient/patient.entity';
+
+import { DoctorModule } from './doctor/doctor.module';
+import { PatientModule } from './patient/patient.module';
 
 @Module({
   imports: [
@@ -16,14 +19,19 @@ import { PatientController } from './patient/patient.controller';
       username: 'postgres',
       password: 'root',
       database: 'schedula_db',
-      entities: [User],
-      synchronize: true,
+
+      entities: [
+        User,
+        Doctor,
+        Patient,
+      ],
+
+      synchronize: false,
     }),
+
     AuthModule,
-  ],
-  controllers: [
-    DoctorController,
-    PatientController,
+    DoctorModule,
+    PatientModule,
   ],
 })
 export class AppModule {}
