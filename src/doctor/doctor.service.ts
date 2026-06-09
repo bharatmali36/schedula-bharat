@@ -2,12 +2,13 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
-
+import { DoctorQueryDto } from './dto/doctor-query.dto';
 import { Doctor } from './doctor.entity';
 import { User } from '../users/user.entity';
 
@@ -21,8 +22,95 @@ export class DoctorService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+async findOne(id: number) {
+const doctor =
+  await this.doctorRepository.findOne({
+    where: { id },
+  });
+
+if (!doctor) {
+  throw new NotFoundException(
+    'Doctor not found',
+  );
+}
+
+return doctor;
 
 
+}
+
+
+
+
+async findAll(query: DoctorQueryDto) {
+const page = Number(query.page) || 1;
+const limit = Number(query.limit) || 10;
+const skip = (page - 1) * limit;
+
+if (page <= 0 || limit <= 0) {
+  throw new BadRequestException(
+    'Page and limit must be greater than 0',
+  );
+}
+const queryBuilder =
+  this.doctorRepository.createQueryBuilder('doctor');
+
+if (query.specialization) {
+  queryBuilder.andWhere(
+    'LOWER(doctor.specialization) = LOWER(:specialization)',
+    {
+      specialization: query.specialization,
+    },
+  );
+}
+
+if (query.search) {
+  queryBuilder.andWhere(
+    'LOWER(doctor.fullName) LIKE LOWER(:search)',
+    {
+      search: `%${query.search}%`,
+    },
+  );
+}
+
+
+
+if (query.availability !== undefined) {
+  queryBuilder.andWhere(
+    'doctor.availability = :availability',
+    {
+      availability:
+        query.availability === 'true',
+    },
+  );
+}
+
+queryBuilder.skip(skip);
+queryBuilder.take(limit);
+
+const [doctors, total] =
+  await queryBuilder.getManyAndCount();
+
+if (!doctors.length) {
+  return {
+    message: 'No doctors found',
+    data: [],
+  };
+}
+return {
+  total,
+  page,
+  limit,
+  data: doctors,
+};
+
+
+
+
+
+
+
+}
 
 
 async createProfile(
