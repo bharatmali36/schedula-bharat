@@ -18,25 +18,19 @@ import { PatientModule } from './patient/patient.module';
     }),
 
     TypeOrmModule.forRoot({
-      type: 'postgres',
+  type: 'postgres',
+  url: process.env.DATABASE_URL,
 
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT),
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-
-      database: process.env.DATABASE_NAME,
-
-      entities: [
-        User,
-        Doctor,
-        Patient,
-      ],
-
-      synchronize: false,
-    }),
-
+  entities: [User, Doctor, Patient],
+  synchronize: false,
+}),
     AuthModule,
     DoctorModule,
     PatientModule,
