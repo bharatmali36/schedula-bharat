@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from './auth/auth.module';
@@ -17,20 +17,20 @@ import { PatientModule } from './patient/patient.module';
       isGlobal: true,
     }),
 
-    TypeOrmModule.forRoot({
-  type: 'postgres',
-  url: process.env.DATABASE_URL,
-
-  ssl: true,
-  extra: {
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  },
-
-  entities: [User, Doctor, Patient],
-  synchronize: false,
+TypeOrmModule.forRootAsync({
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
+    type: 'postgres',
+    url: configService.get<string>('DATABASE_URL'),
+    ssl: configService.get('NODE_ENV') === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
+    entities: [User, Doctor, Patient],
+    synchronize: false,
+  }),
+  inject: [ConfigService],
 }),
+
     AuthModule,
     DoctorModule,
     PatientModule,
