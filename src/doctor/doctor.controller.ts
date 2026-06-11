@@ -17,6 +17,11 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateDoctorProfileDto } from './dto/create-doctor-profile.dto';
 import { UpdateDoctorProfileDto } from './dto/update-doctor-profile.dto';
 
+import { Query } from '@nestjs/common';
+import { DoctorQueryDto } from './dto/doctor-query.dto';
+import { Param, ParseIntPipe } from '@nestjs/common';
+
+
 @Controller('doctor')
 @UseGuards(
   JwtAuthGuard,
@@ -27,6 +32,19 @@ export class DoctorController {
   constructor(
     private readonly doctorService: DoctorService,
   ) {}
+
+  @Get()
+findAll(@Query() query: DoctorQueryDto) {
+  return this.doctorService.findAll(query);
+}
+
+@Get(':id')
+findOne(
+  @Param('id', ParseIntPipe) id: number,
+) {
+  return this.doctorService.findOne(id);
+}
+
 
   @Post('profile')
   createProfile(
