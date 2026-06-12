@@ -33,18 +33,29 @@ export class DoctorController {
     private readonly doctorService: DoctorService,
   ) {}
 
+  private getUserId(req: any): number {
+    const id = req.user?.id;
+    return typeof id === 'string' ? parseInt(id, 10) : id;
+  }
+
   @Get()
 findAll(@Query() query: DoctorQueryDto) {
   return this.doctorService.findAll(query);
 }
 
-@Get(':id')
+// @Get(':id')
+// findOne(
+//   @Param('id', ParseIntPipe) id: number,
+// ) {
+//   return this.doctorService.findOne(id);
+// }
+@Get('details/:id')
 findOne(
   @Param('id', ParseIntPipe) id: number,
 ) {
+  console.log('DOCTOR FINDONE HIT');
   return this.doctorService.findOne(id);
 }
-
 
   @Post('profile')
   createProfile(
@@ -53,7 +64,7 @@ findOne(
     dto: CreateDoctorProfileDto,
   ) {
     return this.doctorService.createProfile(
-      req.user.id,
+      this.getUserId(req),
       dto,
     );
   }
@@ -61,7 +72,7 @@ findOne(
   @Get('profile')
   getProfile(@Req() req) {
     return this.doctorService.getProfile(
-      req.user.id,
+      this.getUserId(req),
     );
   }
 
@@ -72,7 +83,7 @@ findOne(
     dto: UpdateDoctorProfileDto,
   ) {
     return this.doctorService.updateProfile(
-      req.user.id,
+      this.getUserId(req),
       dto,
     );
   }

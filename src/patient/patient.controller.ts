@@ -28,6 +28,11 @@ export class PatientController {
     private readonly patientService: PatientService,
   ) {}
 
+  private getUserId(req: any): number {
+    const id = req.user?.id;
+    return typeof id === 'string' ? parseInt(id, 10) : id;
+  }
+
   @Post('profile')
   createProfile(
     @Req() req,
@@ -35,7 +40,7 @@ export class PatientController {
     dto: CreatePatientProfileDto,
   ) {
     return this.patientService.createProfile(
-      req.user.id,
+      this.getUserId(req),
       dto,
     );
   }
@@ -43,7 +48,7 @@ export class PatientController {
   @Get('profile')
   getProfile(@Req() req) {
     return this.patientService.getProfile(
-      req.user.id,
+      this.getUserId(req),
     );
   }
 
@@ -54,7 +59,7 @@ export class PatientController {
     dto: UpdatePatientProfileDto,
   ) {
     return this.patientService.updateProfile(
-      req.user.id,
+      this.getUserId(req),
       dto,
     );
   }
